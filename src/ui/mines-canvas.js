@@ -7,9 +7,6 @@ $(function () {
     const CUT_DIRS = [ [], [1, 0], [0, 1], [1, 1], [1, -1]]
     const PLAYER_CLASS = [ "red", "green", "blue"]
 
-    
- 
-
       
     const init = () => {
         
@@ -143,20 +140,16 @@ $(function () {
     }
 
 
-    function cutCalculate ( start_cell, end_cell ){
+    function cutProcess ( start_cell, end_cell ){
         console.log(start_cell + " -> " + end_cell)
         //  計算 cut z; 
         if ( start_cell == end_cell) {
           // 如果是4個角才處理
-          if (start_cell == 0) { // /4
+          if (start_cell == 0 || start_cell == 15) { // /4
             cellStateChange(start_cell, 4 )
-          } else if (start_cell == 3) {  // \ 3
+          } else if (start_cell == 3 || start_cell == 12) {  // \ 3
             cellStateChange(start_cell, 3 )
-          } else if (start_cell == 12) {   // \ 3
-            cellStateChange(start_cell, 3 )
-          } else if (start_cell == 15) {  // /4
-            cellStateChange(start_cell, 4 )
-          }
+          } 
         } else {
           [r1, c1] = idx2rc(start_cell);
           [r2, c2] = idx2rc(end_cell);
@@ -189,17 +182,46 @@ $(function () {
         }
         return {r,c, outbound}
     }
-    function cut() {  
+    const cornerCutProcess = (s, e) =>{
+        /* 
+        目前方式不是太好，如果切割線太斜，無法判斷
+        可以優化， 以 Cell 0為例:
+        如果切過 Cell0 表示，Cell左上角，必定與另外三個點，在切割線的不同測
+        */
+        // idx往左上hift (4x4 = > 6x6 ) 原來 {0, 0} = > {1, 1}, {-1, -1} = > {0, 0}, 
+        s_idx = rc2idx(s.r+1, s.c+1, 6);
+        e_idx = rc2idx(e.r+1, e.c+1, 6);
+        //console.log(s_idx, e_idx)
+        if        (s_idx + e_idx == 7 && (s_idx==1   || e_idx==1  )) {
+            cutProcess( 0, 0 );
+        } else if (s_idx + e_idx == 15 && (s_idx==4  || e_idx==4  )) {
+            cutProcess( 3, 3 );
+        } else if (s_idx + e_idx == 55 && (s_idx==24 || e_idx==24 )) {
+            cutProcess( 12, 12 );
+        } else if (s_idx + e_idx == 63 && (s_idx==29 || e_idx==29)) {
+            cutProcess( 15, 15 );
+        } else {
+            return false;
+        }
+        return true
+    }
+    const  cut = () => {  
         try {
             //console.log(PG_INFO)
             //console.log(TOUCH_INFO)
             var start_cell = NaN, end_cell = NaN
             s = position2Cellidx(TOUCH_INFO.start)
             e = position2Cellidx(TOUCH_INFO.end)
+
+            start_cell= rc2idx(s.r,s.c)
+            end_cell= rc2idx(e.r,e.c)
+            
             if (s.outbound || e.outbound) { 
                 console.log(s.outbound, e.outbound)
                 // 特判
-                if (s.r == e.r && s.r >=0 && s.r <=3) { // 橫線
+                if (start_cell == end_cell) { // 同一格
+                    return false
+                } else if (s.r == e.r && s.r >=0 && s.r <=3) { // 橫線
                     start_cell= rc2idx(s.r, 0)
                     end_cell= rc2idx(e.r, 1)    
                 } else if (s.c == e.c && s.c >=0 && s.c <=3) {
@@ -207,32 +229,9 @@ $(function () {
                     end_cell= rc2idx(1, e.c)    
                 } else {
                     // 4個角處理
-                    /* 
-                    目前方式不是太好，如果切割線太斜，無法判斷
-                    可以優化， 以 Cell 0為例:
-                    如果切過 Cell0 表示，Cell左上角，必定與另外三個點，在切割線的不同測
-                    */
-                    // idx往左上hift (4x4 = > 6x6 ) 原來 {0, 0} = > {1, 1}, {-1, -1} = > {0, 0}, 
-                    s_idx = rc2idx(s.r+1, s.c+1, 6);
-                    e_idx = rc2idx(e.r+1, e.c+1, 6);
-                    //console.log(s_idx, e_idx)
-                    if        (s_idx + e_idx == 7 && (s_idx==1   || e_idx==1  )) {
-                        cutCalculate( 0, 0 );
-                    } else if (s_idx + e_idx == 15 && (s_idx==4  || e_idx==4  )) {
-                        cutCalculate( 3, 3 );
-                    } else if (s_idx + e_idx == 55 && (s_idx==24 || e_idx==24 )) {
-                        cutCalculate( 12, 12 );
-                    } else if (s_idx + e_idx == 63 && (s_idx==29 || e_idx==29)) {
-                        cutCalculate( 15, 15 );
-                    } else {
-                        return false;
-                    }
-                    return true
+                    return cornerCutProcess(s, e)        
                 }
-            } else {
-                start_cell= rc2idx(s.r,s.c)
-                end_cell= rc2idx(e.r,e.c)
-            }
+            } 
 
             if (   ( end_cell == 0  && start_cell== 0 )
                 || ( end_cell == 3  && start_cell== 3 )
@@ -252,10 +251,10 @@ $(function () {
                 || ( end_cell == 3  && w == 3 )
                 || ( end_cell == 12 && w == 3 )
                 || ( end_cell == 15 && w == 4 ) ) {
-                    cutCalculate( start_cell, end_cell );
+                    cutProcess( start_cell, end_cell );
                 }
             } else {
-                cutCalculate( start_cell, end_cell );
+                cutProcess( start_cell, end_cell );
             }
         } catch(e) {
             return false
@@ -315,8 +314,8 @@ $(function () {
         ) 
         {  // 以防超出邊界
             TOUCH_INFO.touch = false;
-            if (cut())
-             clearCanvas();
+            cut()           // if (cut())  // for debug
+            clearCanvas();
         } else {
             clearCanvas();
             drawLine();
@@ -324,9 +323,9 @@ $(function () {
      }
      
      const mouseupHandler = (event) => {
-       //console.log(TOUCH_INFO.end.x, TOUCH_INFO.end.y)
-       TOUCH_INFO.touch = false;
-       if (cut())
+        //console.log(TOUCH_INFO.end.x, TOUCH_INFO.end.y)
+        TOUCH_INFO.touch = false;
+        cut()           // if (cut())  // for debug
         clearCanvas();
        
      }
