@@ -1,0 +1,125 @@
+body {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+h1 {
+    text-align: center;
+}
+div.continer {
+    display:flex; 
+    justify-content:center; 
+    align-items:center;
+    height: 600px;
+}
+div.continer canvas {
+    position: absolute;
+    width: 550px;
+    height: 550px;
+    border: 1px solid #333;
+    z-index: 100;
+  }
+
+.wrapper {
+  border: 1px solid #333;
+  width:416px;
+  height:416px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  display: grid;
+  grid-template-columns: 104px 104px 104px 104px;
+  grid-template-rows:  104px 104px 104px 104px;
+}
+.buttoms  {
+  margin: 10px auto;
+  width: 180px;
+  /* padding-left: 100px; */
+  padding: 10px 10px 10px 10px;
+}
+.cellinfo {
+  position:absolute;
+  top:25px;
+  left:25px;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+  z-index: 50;
+  color: #aaa;
+}
+div.cell{
+  position:relative;
+  width:100px;
+  height:100px;
+  margin-top:2px;
+  margin-left:2px;
+  border:1px solid #333;  
+}
+
+div.cut1::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top: 0;
+  width: 100px;
+  height: 50px;
+  box-sizing:border-box;
+  border-bottom:2px dashed gray;
+  transform-origin:bottom center;
+  transform:rotateZ(90deg) scale(1.2);
+}
+div.cut2::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top: 0;
+  width: 100px;
+  height: 50px;
+  box-sizing:border-box;
+  border-bottom:2px dashed gray;
+  transform-origin:bottom center;
+  transform:rotateZ(0deg) scale(1.2);
+}
+div.cut3::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width: 100px;
+  height: 50px;
+  box-sizing:border-box;
+  border-bottom:1px dashed gray;
+  transform-origin:bottom center;
+  transform:rotateZ(45deg) scale(1.7);
+}
+div.cut4::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width: 100px;
+  height: 50px;
+  box-sizing:border-box;
+  border-bottom:1px dashed gray;
+  transform-origin:bottom center;
+  transform:rotateZ(-45deg) scale(1.7);
+}
+
+div.bomb {
+  background-color: red;
+}
+
+
+div.red::before {
+    border-bottom-color: red;
+    border-bottom-style: solid;
+}
+div.green::before {
+    border-bottom-color: green;
+    border-bottom-style: solid;
+}
+div.blue::before {
+    border-bottom-color: blue;
+    border-bottom-style: solid;
+}
+
